@@ -583,10 +583,10 @@ All list endpoints are paginated using [Pagy](https://github.com/ddnexus/pagy).
 }
 ```
 
-To request a specific page, use the `?page=` query parameter:
+To request a specific page, use the `?page[number]=` query parameter:
 
 ```
-GET /api/v1/admin/schools?page=2
+GET /api/v1/admin/schools?page[number]=2
 ```
 
 ---
