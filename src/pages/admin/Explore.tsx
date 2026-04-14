@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { PageHeader } from "../../components/shared/PageHeader";
 import { schoolsApi } from "../../api/admin/schools";
 import { classroomsApi } from "../../api/admin/classrooms";
@@ -28,14 +28,6 @@ import {
 } from "../../components/ui/sheet";
 import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "../../components/ui/pagination";
 import {
   Users,
   ChevronRight,
@@ -72,32 +64,35 @@ export function Explore() {
   const [classStudents, setClassStudents] = useState<any[]>([]);
   const [classTeacher, setClassTeacher] = useState<any | null>(null);
   const [classAssignments, setClassAssignments] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(true);
+  const [loadingMoreSchools, setLoadingMoreSchools] = useState(false);
+  const [loadingMoreSchoolStudents, setLoadingMoreSchoolStudents] =
+    useState(false);
 
-  // Pagination Meta States
-  const [schoolMeta, setSchoolMeta] = useState({ page: 1, pages: 1, count: 0 });
-  const [classroomMeta, setClassroomMeta] = useState({
+  // Meta States (Counts & Pages)
+  const [schoolMeta, setSchoolMeta] = useState<any>({ page: 1, pages: 1 });
+  const [classroomMeta, setClassroomMeta] = useState<any>({
     page: 1,
     pages: 1,
     count: 0,
   });
-  const [schoolStudentMeta, setSchoolStudentMeta] = useState({
+  const [schoolStudentMeta, setSchoolStudentMeta] = useState<any>({
+    page: 1,
+    pages: 1,
+  });
+  const [schoolTeacherMeta, setSchoolTeacherMeta] = useState<any>({
     page: 1,
     pages: 1,
     count: 0,
   });
-  const [schoolTeacherMeta, setSchoolTeacherMeta] = useState({
-    page: 1,
-    pages: 1,
-    count: 0,
-  });
-  const [classStudentMeta, setClassStudentMeta] = useState({
+  const [classStudentMeta, setClassStudentMeta] = useState<any>({
     page: 1,
     pages: 1,
     count: 0,
   });
 
-  // Search States (Local filtering for current page)
+  // Search States
   const [schoolSearchQuery, setSchoolSearchQuery] = useState("");
   const [classroomSearchQuery, setClassroomSearchQuery] = useState("");
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
@@ -125,50 +120,150 @@ export function Explore() {
     loading: boolean;
   }>({ isOpen: false, type: null, entity: null, loading: false });
 
+  // --- Infinite Scroll Logic for Schools ---
+  const observerSchools = useRef<IntersectionObserver | null>(null);
+  const isFetchingSchoolsRef = useRef(false);
+
+  const lastSchoolElementRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (observerSchools.current) observerSchools.current.disconnect();
+
+      observerSchools.current = new IntersectionObserver((entries) => {
+        if (
+          entries[0].isIntersecting &&
+          !isFetchingSchoolsRef.current &&
+          schoolMeta.page < schoolMeta.pages
+        ) {
+          fetchSchools(schoolMeta.page + 1);
+        }
+      });
+
+      if (node) observerSchools.current.observe(node);
+    },
+    [schoolMeta.page, schoolMeta.pages],
+  );
+
+  // --- Infinite Scroll Logic for School Students Directory ---
+  const observerSchoolStudents = useRef<IntersectionObserver | null>(null);
+  const isFetchingSchoolStudentsRef = useRef(false);
+
+  const lastSchoolStudentElementRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (observerSchoolStudents.current)
+        observerSchoolStudents.current.disconnect();
+
+      observerSchoolStudents.current = new IntersectionObserver((entries) => {
+        if (
+          entries[0].isIntersecting &&
+          !isFetchingSchoolStudentsRef.current &&
+          schoolStudentMeta.page < schoolStudentMeta.pages
+        ) {
+          fetchSchoolStudents(schoolStudentMeta.page + 1);
+        }
+      });
+
+      if (node) observerSchoolStudents.current.observe(node);
+    },
+    [schoolStudentMeta.page, schoolStudentMeta.pages],
+  );
+
   // --- Fetchers ---
   const fetchSchools = async (page = 1) => {
-    setLoading(true);
+    isFetchingSchoolsRef.current = true;
+
+    if (page === 1) setLoading(true);
+    else setLoadingMoreSchools(true);
+
     try {
       const res = await schoolsApi.list(page);
-      setSchools(res.data);
+      if (page === 1) {
+        setSchools(res.data);
+      } else {
+        setSchools((prev) => {
+          const existingIds = new Set(prev.map((s) => s.id));
+          const newSchools = res.data.filter(
+            (s: any) => !existingIds.has(s.id),
+          );
+          return [...prev, ...newSchools];
+        });
+      }
       setSchoolMeta(res.meta);
     } catch (err) {
       console.error("Failed to fetch schools", err);
     } finally {
       setLoading(false);
+      setLoadingMoreSchools(false);
+      isFetchingSchoolsRef.current = false;
     }
   };
 
-  const fetchClassrooms = async (page = 1) => {
+  const fetchClassrooms = async () => {
     if (!selectedSchool) return;
     try {
-      const res = await classroomsApi.list(page, selectedSchool.id);
-      setClassrooms(res.data);
-      setClassroomMeta(res.meta);
+      let allData: any[] = [];
+      let currentPage = 1;
+      let totalPages = 1;
+
+      do {
+        const res = await classroomsApi.list(currentPage, selectedSchool.id);
+        allData = [...allData, ...res.data];
+        totalPages = res.meta.pages || 1;
+        currentPage++;
+      } while (currentPage <= totalPages);
+
+      setClassrooms(allData);
+      setClassroomMeta({ page: 1, pages: 1, count: allData.length });
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch classrooms", err);
+    }
+  };
+
+  const fetchSchoolTeachers = async () => {
+    if (!selectedSchool) return;
+    try {
+      let allData: any[] = [];
+      let currentPage = 1;
+      let totalPages = 1;
+
+      do {
+        const res = await teachersApi.list(currentPage, selectedSchool.id);
+        allData = [...allData, ...res.data];
+        totalPages = res.meta.pages || 1;
+        currentPage++;
+      } while (currentPage <= totalPages);
+
+      setSchoolTeachers(allData);
+      setSchoolTeacherMeta({ page: 1, pages: 1, count: allData.length });
+    } catch (err) {
+      console.error("Failed to fetch teachers", err);
     }
   };
 
   const fetchSchoolStudents = async (page = 1) => {
     if (!selectedSchool) return;
+    isFetchingSchoolStudentsRef.current = true;
+
+    if (page > 1) setLoadingMoreSchoolStudents(true);
+
     try {
       const res = await studentsApi.list(page, selectedSchool.id);
-      setSchoolStudents(res.data);
+      if (page === 1) {
+        setSchoolStudents(res.data);
+      } else {
+        setSchoolStudents((prev) => {
+          const existingIds = new Set(prev.map((s) => s.id));
+          const newStudents = res.data.filter(
+            (s: any) => !existingIds.has(s.id),
+          );
+          return [...prev, ...newStudents];
+        });
+      }
       setSchoolStudentMeta(res.meta);
     } catch (err) {
       console.error(err);
-    }
-  };
-
-  const fetchSchoolTeachers = async (page = 1) => {
-    if (!selectedSchool) return;
-    try {
-      const res = await teachersApi.list(page, selectedSchool.id);
-      setSchoolTeachers(res.data);
-      setSchoolTeacherMeta(res.meta);
-    } catch (err) {
-      console.error(err);
+    } finally {
+      if (page > 1) setLoadingMoreSchoolStudents(false);
+      isFetchingSchoolStudentsRef.current = false;
     }
   };
 
@@ -177,9 +272,9 @@ export function Explore() {
     setLoading(true);
     try {
       await Promise.all([
-        fetchClassrooms(1),
+        fetchClassrooms(),
         fetchSchoolStudents(1),
-        fetchSchoolTeachers(1),
+        fetchSchoolTeachers(),
       ]);
     } catch (err) {
       console.error("Failed to fetch school data", err);
@@ -188,18 +283,29 @@ export function Explore() {
     }
   };
 
-  const fetchClassStudents = async (page = 1) => {
+  // --- UPDATED: Load ALL Class Students at once ---
+  const fetchClassStudents = async () => {
     if (!selectedSchool || !selectedClassroom) return;
     try {
-      const res = await studentsApi.list(
-        page,
-        selectedSchool.id,
-        selectedClassroom.id,
-      );
-      setClassStudents(res.data);
-      setClassStudentMeta(res.meta);
+      let allData: any[] = [];
+      let currentPage = 1;
+      let totalPages = 1;
+
+      do {
+        const res = await studentsApi.list(
+          currentPage,
+          selectedSchool.id,
+          selectedClassroom.id,
+        );
+        allData = [...allData, ...res.data];
+        totalPages = res.meta.pages || 1;
+        currentPage++;
+      } while (currentPage <= totalPages);
+
+      setClassStudents(allData);
+      setClassStudentMeta({ page: 1, pages: 1, count: allData.length });
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch class students", err);
     }
   };
 
@@ -207,16 +313,13 @@ export function Explore() {
     if (!selectedSchool || !selectedClassroom) return;
     setLoading(true);
     try {
-      // 1. Fetch Paginated Students
-      await fetchClassStudents(1);
+      await fetchClassStudents(); // Fetches all enrolled students
 
-      // 2. Fetch Class Teacher (Homeroom)
       const teacherId = selectedClassroom.attributes.class_teacher_id;
       setClassTeacher(
         teacherId ? (await teachersApi.get(teacherId)).data : null,
       );
 
-      // 3. Fetch Subject Assignments
       try {
         const assignmentsRes = await apiFetch<any>(
           `/admin/teacher_subject_assignments?classroom_id=${selectedClassroom.id}`,
@@ -376,24 +479,24 @@ export function Explore() {
     try {
       if (deleteConfig.type === "school") {
         await schoolsApi.delete(deleteConfig.entity.id);
-        await fetchSchools(schoolMeta.page);
+        await fetchSchools(1);
         if (selectedSchool?.id === deleteConfig.entity.id) {
           setSelectedSchool(null);
           setSelectedClassroom(null);
         }
       } else if (deleteConfig.type === "classroom") {
         await classroomsApi.delete(deleteConfig.entity.id);
-        await fetchClassrooms(classroomMeta.page);
+        await fetchClassrooms();
         if (selectedClassroom?.id === deleteConfig.entity.id)
           setSelectedClassroom(null);
       } else if (deleteConfig.type === "student") {
         await studentsApi.delete(deleteConfig.entity.id);
-        if (selectedClassroom) await fetchClassStudents(classStudentMeta.page);
-        await fetchSchoolStudents(schoolStudentMeta.page);
+        if (selectedClassroom) await fetchClassStudents(); // Refresh all class students
+        await fetchSchoolStudents(1);
       } else if (deleteConfig.type === "teacher") {
         await teachersApi.delete(deleteConfig.entity.id);
         if (selectedClassroom) await fetchClassDetails();
-        await fetchSchoolTeachers(schoolTeacherMeta.page);
+        await fetchSchoolTeachers();
       } else if (deleteConfig.type === "assignment") {
         await apiFetch(
           `/admin/teacher_subject_assignments/${deleteConfig.entity.id}`,
@@ -413,79 +516,11 @@ export function Explore() {
     }
   };
 
-  // Helper function to render pagination for grids and lists
-  const renderPagination = (
-    meta: { page: number; pages: number },
-    onPageChange: (page: number) => void,
-  ) => {
-    if (!meta || meta.pages <= 1) return null;
-
-    return (
-      <div className="mt-6 mb-2 flex justify-center">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => meta.page > 1 && onPageChange(meta.page - 1)}
-                className={
-                  meta.page <= 1
-                    ? "pointer-events-none opacity-50"
-                    : "cursor-pointer"
-                }
-              />
-            </PaginationItem>
-
-            {Array.from({ length: meta.pages }).map((_, i) => {
-              const page = i + 1;
-              if (
-                page === 1 ||
-                page === meta.pages ||
-                (page >= meta.page - 1 && page <= meta.page + 1)
-              ) {
-                return (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      isActive={page === meta.page}
-                      onClick={() => onPageChange(page)}
-                      className="cursor-pointer"
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              } else if (page === meta.page - 2 || page === meta.page + 2) {
-                return (
-                  <PaginationItem key={page}>
-                    <span className="px-2">...</span>
-                  </PaginationItem>
-                );
-              }
-              return null;
-            })}
-
-            <PaginationItem>
-              <PaginationNext
-                onClick={() =>
-                  meta.page < meta.pages && onPageChange(meta.page + 1)
-                }
-                className={
-                  meta.page >= meta.pages
-                    ? "pointer-events-none opacity-50"
-                    : "cursor-pointer"
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-6 relative pb-12">
       <PageHeader
         title="Explore"
-        description="Manage and drill down into schools, classrooms, and personnel."
+        description="Manage schools, classrooms and personnel."
       />
 
       <div className="flex items-center space-x-2 text-sm text-muted-foreground pb-4 border-b">
@@ -519,13 +554,13 @@ export function Explore() {
         )}
       </div>
 
-      {loading && (
+      {loading && !loadingMoreSchools && (
         <div className="flex h-40 items-center justify-center">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
 
-      {/* VIEW 1: SCHOOLS */}
+      {/* VIEW 1: SCHOOLS (Infinite Scroll) */}
       {!loading && !selectedSchool && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between gap-4">
@@ -544,47 +579,62 @@ export function Explore() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {filteredSchools.map((school) => (
-              <Card
-                key={school.id}
-                className="cursor-pointer hover:border-primary transition-colors hover:shadow-md relative group"
-                onClick={() => setSelectedSchool(school)}
-              >
-                <CardHeader className="flex flex-row items-start justify-between pb-2">
-                  <CardTitle className="text-lg font-bold pr-16 leading-tight">
-                    {school.attributes.name}
-                  </CardTitle>
-                  <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={(e) => handleEdit(e, "school", school)}
-                    >
-                      <Edit className="h-3.5 w-3.5 text-primary" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={(e) => handleDeleteClick(e, "school", school)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+            {filteredSchools.map((school, index) => {
+              const isLastElement = filteredSchools.length === index + 1;
+              const cardContent = (
+                <Card
+                  className="cursor-pointer hover:border-primary transition-colors hover:shadow-md relative group h-full"
+                  onClick={() => setSelectedSchool(school)}
+                >
+                  <CardHeader className="flex flex-row items-start justify-between pb-2">
+                    <CardTitle className="text-lg font-bold pr-16 leading-tight">
+                      {school.attributes.name}
+                    </CardTitle>
+                    <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={(e) => handleEdit(e, "school", school)}
+                      >
+                        <Edit className="h-3.5 w-3.5 text-primary" />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={(e) => handleDeleteClick(e, "school", school)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      {school.attributes.board.toUpperCase()} Board
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {school.attributes.subdomain}.school.com
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+
+              if (isLastElement)
+                return (
+                  <div ref={lastSchoolElementRef} key={school.id}>
+                    {cardContent}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {school.attributes.board.toUpperCase()} Board
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {school.attributes.subdomain}.school.com
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+                );
+              return <div key={school.id}>{cardContent}</div>;
+            })}
           </div>
-          {renderPagination(schoolMeta, fetchSchools)}
+
+          {loadingMoreSchools && (
+            <div className="flex justify-center py-6">
+              <div className="w-6 h-6 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
         </div>
       )}
 
@@ -602,15 +652,14 @@ export function Explore() {
           <Tabs defaultValue="classrooms" className="w-full">
             <TabsList className="mb-4">
               <TabsTrigger value="classrooms">
-                Classrooms ({classroomMeta.count || classrooms.length})
+                Classrooms ({classrooms.length})
               </TabsTrigger>
               <TabsTrigger value="directory">
                 Student Directory (
                 {schoolStudentMeta.count || schoolStudents.length})
               </TabsTrigger>
               <TabsTrigger value="staff">
-                Staff Directory (
-                {schoolTeacherMeta.count || schoolTeachers.length})
+                Staff Directory ({schoolTeachers.length})
               </TabsTrigger>
             </TabsList>
 
@@ -629,7 +678,8 @@ export function Explore() {
                   <Plus className="mr-2 h-4 w-4" /> Add Classroom
                 </Button>
               </div>
-              <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-5">
+
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredClassrooms.map((classroom) => (
                   <Card
                     key={classroom.id}
@@ -662,15 +712,29 @@ export function Explore() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        Grade: {classroom.attributes.grade} | Section:{" "}
-                        {classroom.attributes.section.toUpperCase()}
-                      </p>
+                      <div className="space-y-1.5 mt-4 pt-4 border-t border-dashed">
+                        <p className="text-sm flex justify-between items-center">
+                          <span className="text-muted-foreground">
+                            Class Teacher:
+                          </span>
+                          <span className="font-medium truncate ml-2 text-right">
+                            {classroom.attributes.class_teacher?.name ||
+                              "Not Assigned"}
+                          </span>
+                        </p>
+                        <p className="text-sm flex justify-between items-center">
+                          <span className="text-muted-foreground">
+                            Students:
+                          </span>
+                          <span className="font-medium">
+                            {classroom.attributes.students_count || 0}
+                          </span>
+                        </p>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
-              {renderPagination(classroomMeta, fetchClassrooms)}
             </TabsContent>
 
             <TabsContent value="directory" className="space-y-4 mt-0">
@@ -689,40 +753,56 @@ export function Explore() {
                 </Button>
               </div>
               <div className="rounded-md border bg-card divide-y">
-                {filteredSchoolStudents.map((student) => (
-                  <div
-                    key={student.id}
-                    className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors group cursor-pointer"
-                    onClick={() => setViewingStudent(student)}
-                  >
-                    <div>
-                      <p className="font-medium">{student.attributes.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Adm: {student.attributes.admission_number}
-                      </p>
+                {filteredSchoolStudents.map((student, index) => {
+                  const isLastElement =
+                    filteredSchoolStudents.length === index + 1;
+                  const rowContent = (
+                    <div
+                      className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors group cursor-pointer"
+                      onClick={() => setViewingStudent(student)}
+                    >
+                      <div>
+                        <p className="font-medium">{student.attributes.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Adm: {student.attributes.admission_number}
+                        </p>
+                      </div>
+                      <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => handleEdit(e, "student", student)}
+                        >
+                          <Edit className="h-4 w-4 text-primary" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) =>
+                            handleDeleteClick(e, "student", student)
+                          }
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => handleEdit(e, "student", student)}
-                      >
-                        <Edit className="h-4 w-4 text-primary" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) =>
-                          handleDeleteClick(e, "student", student)
-                        }
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  );
+
+                  if (isLastElement)
+                    return (
+                      <div ref={lastSchoolStudentElementRef} key={student.id}>
+                        {rowContent}
+                      </div>
+                    );
+                  return <div key={student.id}>{rowContent}</div>;
+                })}
               </div>
-              {renderPagination(schoolStudentMeta, fetchSchoolStudents)}
+
+              {loadingMoreSchoolStudents && (
+                <div className="flex justify-center py-6">
+                  <div className="w-6 h-6 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="staff" className="space-y-4 mt-0">
@@ -780,7 +860,6 @@ export function Explore() {
                   </Card>
                 ))}
               </div>
-              {renderPagination(schoolTeacherMeta, fetchSchoolTeachers)}
             </TabsContent>
           </Tabs>
         </div>
@@ -833,9 +912,7 @@ export function Explore() {
             <Card>
               <CardContent className="flex items-center justify-around p-6">
                 <div className="text-center">
-                  <p className="text-3xl font-bold">
-                    {classStudentMeta.count || classStudents.length}
-                  </p>
+                  <p className="text-3xl font-bold">{classStudents.length}</p>
                   <p className="text-sm text-muted-foreground">Students</p>
                 </div>
                 <Separator orientation="vertical" className="h-12" />
@@ -953,7 +1030,6 @@ export function Explore() {
                 </div>
               ))}
             </div>
-            {renderPagination(classStudentMeta, fetchClassStudents)}
           </div>
         </div>
       )}
@@ -1104,22 +1180,24 @@ export function Explore() {
           onSuccess={() => fetchSchools(schoolMeta.page)}
         />
       )}
+
       {isClassroomModalOpen && (
         <ClassroomFormModal
           open={isClassroomModalOpen}
           onOpenChange={setIsClassroomModalOpen}
           classroomId={editingClassroom?.id || null}
-          onSuccess={() => fetchClassrooms(classroomMeta.page)}
+          onSuccess={fetchClassrooms}
         />
       )}
+
       {isStudentModalOpen && (
         <StudentFormModal
           open={isStudentModalOpen}
           onOpenChange={setIsStudentModalOpen}
           studentId={editingStudent?.id || null}
           onSuccess={() => {
-            if (selectedClassroom) fetchClassStudents(classStudentMeta.page);
-            fetchSchoolStudents(schoolStudentMeta.page);
+            if (selectedClassroom) fetchClassStudents();
+            fetchSchoolStudents(1);
           }}
         />
       )}
@@ -1130,7 +1208,7 @@ export function Explore() {
           teacherId={editingTeacher?.id || null}
           onSuccess={() => {
             if (selectedClassroom) fetchClassDetails();
-            fetchSchoolTeachers(schoolTeacherMeta.page);
+            fetchSchoolTeachers();
           }}
         />
       )}
