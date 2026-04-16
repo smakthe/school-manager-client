@@ -96,8 +96,36 @@ export function AdminDashboard() {
         if (
           Object.keys(response.charts.subject_distribution || {}).length > 0
         ) {
+          const subjectMap: Record<string, string> = {
+            Mathematics: "MAT",
+            English: "ENG",
+            Hindi: "HIN",
+            "Social Studies": "SST",
+            Sanskrit: "SAN",
+            Commerce: "COM",
+            Economics: "ECO",
+            "Business Studies": "BST",
+            Accountancy: "ACC",
+            History: "HIS",
+            Geography: "GEO",
+            Physics: "PHY",
+            Chemistry: "CHE",
+            Biology: "BIO",
+            Botany: "BOT",
+            Zoology: "ZOO",
+            "Computer Science": "CMP",
+            Craft: "CRA",
+            "Political Science": "POL",
+            Psychology: "PSY",
+            "Environmental Science": "EVS",
+          };
+          const subjectLabels = Object.keys(
+            response.charts.subject_distribution,
+          ).map((name) => subjectMap[name] || name);
+
           setSubjectChartData({
-            labels: Object.keys(response.charts.subject_distribution),
+            labels: subjectLabels,
+            fullNames: Object.keys(response.charts.subject_distribution),
             datasets: [
               {
                 data: toPercentages(response.charts.subject_distribution),
@@ -220,7 +248,7 @@ export function AdminDashboard() {
               <CardContent>
                 <div className="h-[250px] flex items-center justify-center pb-4">
                   {boardChartData ? (
-                    <Pie
+                    <Doughnut
                       data={boardChartData}
                       options={{
                         responsive: true,
@@ -242,7 +270,7 @@ export function AdminDashboard() {
               <CardContent>
                 <div className="h-[250px] flex items-center justify-center pb-4">
                   {subjectChartData ? (
-                    <Doughnut
+                    <Pie
                       data={subjectChartData}
                       options={{
                         responsive: true,
@@ -251,7 +279,11 @@ export function AdminDashboard() {
                           legend: { position: "right" },
                           tooltip: {
                             callbacks: {
-                              label: (c) => ` ${c.label}: ${c.raw}%`,
+                              label: (c) => {
+                                const fullName =
+                                  subjectChartData.fullNames[c.dataIndex];
+                                return ` ${fullName || c.label}: ${c.raw}%`;
+                              },
                             },
                           },
                         },
