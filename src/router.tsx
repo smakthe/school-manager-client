@@ -6,6 +6,10 @@ import { LoginPage } from "./pages/auth/LoginPage";
 import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { ProfilePage } from "./pages/admin/ProfilePage";
 import { Explore } from "./pages/admin/Explore";
+import { PrincipalDashboard } from "./pages/principal/PrincipalDashboard";
+import { PrincipalExplore } from "./pages/principal/PrincipalExplore";
+import { TeacherDashboard } from "./pages/teacher/TeacherDashboard";
+import { TeacherExplore } from "./pages/teacher/TeacherExplore";
 
 export const router = createBrowserRouter([
   {
@@ -42,7 +46,8 @@ export const router = createBrowserRouter([
           {
             element: <RootLayout />,
             children: [
-              { index: true, element: <div>Principal Dashboard</div> },
+              { index: true,        element: <PrincipalDashboard /> },
+              { path: "explore",    element: <PrincipalExplore /> },
             ],
           },
         ],
@@ -53,7 +58,10 @@ export const router = createBrowserRouter([
         children: [
           {
             element: <RootLayout />,
-            children: [{ index: true, element: <div>Teacher Dashboard</div> }],
+            children: [
+              { index: true, element: <TeacherDashboard /> },
+              { path: "explore", element: <TeacherExplore /> },
+            ],
           },
         ],
       },

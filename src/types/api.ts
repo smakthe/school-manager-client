@@ -5,6 +5,8 @@ export interface User {
   email: string;
   role: Role;
   userable_id: number;
+  name?: string;
+  school_name?: string;
 }
 
 export interface LoginResponse {

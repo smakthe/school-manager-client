@@ -65,8 +65,13 @@ export function StudentSheet({ student, onClose, onEdit }: StudentSheetProps) {
                 <GraduationCap className="h-6 w-6 text-primary" />
                 {student.attributes.name}
               </SheetTitle>
-              <SheetDescription>
-                Admission No: {student.attributes.admission_number}
+              <SheetDescription className="flex flex-col gap-1 mt-2">
+                <span className="text-sm font-semibold text-foreground">
+                  Class {student.attributes.current_class_display}
+                </span>
+                <span>
+                  Admission No: {student.attributes.admission_number}
+                </span>
               </SheetDescription>
               <div className="flex gap-2 mt-4">
                 <Badge

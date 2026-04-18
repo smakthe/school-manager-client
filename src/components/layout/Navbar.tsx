@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { useThemeStore } from "../../stores/themeStore";
+import { useTeacherStore } from "../../stores/teacherStore";
 import {
   Moon,
   Sun,
@@ -23,25 +24,41 @@ import {
 export function Navbar() {
   const { user, logout } = useAuthStore();
   const { theme, setTheme } = useThemeStore();
+  const { homeroom } = useTeacherStore();
   const location = useLocation();
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  const navLinks = [
-    { name: "Dashboard", path: "/admin" },
-    { name: "Explore", path: "/admin/explore" },
-  ];
+  const isAdmin     = user?.role === "admin";
+  const isPrincipal = user?.role === "principal";
+
+  const homeBase = isAdmin ? "/admin" : isPrincipal ? "/principal" : "/teacher";
+
+  const navLinks = isAdmin
+    ? [
+        { name: "Dashboard", path: "/admin" },
+        { name: "Explore",   path: "/admin/explore" },
+      ]
+    : isPrincipal
+    ? [
+        { name: "Dashboard", path: "/principal" },
+        { name: "Explore",   path: "/principal/explore" },
+      ]
+    : [
+        { name: "Dashboard", path: "/teacher" },
+        // Only show My Classroom if this teacher is confirmed as a class teacher
+        ...(homeroom ? [{ name: "My Classroom", path: "/teacher/explore" }] : []),
+      ];
+
+  const displayName = user?.name || (isAdmin ? "Admin User" : isPrincipal ? "Principal" : "Teacher");
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-6">
-          <Link
-            to="/admin"
-            className="flex items-center gap-2 font-bold text-lg text-primary"
-          >
+          <Link to={homeBase} className="flex items-center gap-2 font-bold text-lg text-primary">
             <GraduationCap className="h-6 w-6" />
             <span>School Manager</span>
           </Link>
@@ -94,7 +111,7 @@ export function Navbar() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      Admin User
+                      {displayName}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user?.email}
