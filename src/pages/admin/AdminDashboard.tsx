@@ -22,6 +22,7 @@ import {
   Filler,
 } from "chart.js";
 import { Doughnut, Pie, Bar, Line } from "react-chartjs-2";
+import { CHART_PALETTE } from "../../components/ui/palette";
 
 ChartJS.register(
   ArcElement,
@@ -34,6 +35,19 @@ ChartJS.register(
   Legend,
   Filler,
 );
+
+// Shared hash — same index into CHART_PALETTE for consistent subject coloring
+function subjectPaletteIndex(subject: string): number {
+  return (
+    subject.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) %
+    CHART_PALETTE.length
+  );
+}
+
+// Returns an rgba string for Chart.js dataset colours
+function subjectChartColor(subject: string): string {
+  return CHART_PALETTE[subjectPaletteIndex(subject)];
+}
 
 export function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -129,14 +143,9 @@ export function AdminDashboard() {
             datasets: [
               {
                 data: toPercentages(response.charts.subject_distribution),
-                backgroundColor: [
-                  "rgba(79, 70, 229, 0.8)",
-                  "rgba(16, 185, 129, 0.8)",
-                  "rgba(245, 158, 11, 0.8)",
-                  "rgba(239, 68, 68, 0.8)",
-                  "rgba(139, 92, 246, 0.8)",
-                  "rgba(6, 182, 212, 0.8)",
-                ],
+                backgroundColor: Object.keys(
+                  response.charts.subject_distribution,
+                ).map((name) => subjectChartColor(name)),
                 borderWidth: 1,
               },
             ],
