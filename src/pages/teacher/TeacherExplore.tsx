@@ -50,10 +50,10 @@ export function TeacherExplore() {
       <div className="space-y-6">
         <PageHeader
           title="My Classroom"
-          description="You are currently not assigned as a Class Teacher for any homeroom."
+          description="You are currently not assigned as a Class Teacher for any class."
         />
         <div className="flex flex-col items-center justify-center min-h-[400px] border-2 border-dashed rounded-xl bg-muted/5">
-          <p className="text-muted-foreground">No homeroom assigned.</p>
+          <p className="text-muted-foreground">No class assigned.</p>
         </div>
       </div>
     );
