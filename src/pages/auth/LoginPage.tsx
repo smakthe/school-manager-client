@@ -42,13 +42,14 @@ const CONNECTIONS: [number, number][] = [
   [1, 7],
 ];
 
+// Swapped colors to white and greys
 const ACCENT_DOTS = [
-  { x: 52, y: 138, c: "#6366f1", d: "0s" },
-  { x: 414, y: 158, c: "#0ea5e9", d: "1.1s" },
-  { x: 442, y: 448, c: "#a855f7", d: "2.2s" },
-  { x: 28, y: 658, c: "#6366f1", d: "0.6s" },
-  { x: 402, y: 722, c: "#0ea5e9", d: "1.7s" },
-  { x: 200, y: 58, c: "#a855f7", d: "0.3s" },
+  { x: 52, y: 138, c: "#ffffff", d: "0s" },
+  { x: 414, y: 158, c: "#a3a3a3", d: "1.1s" },
+  { x: 442, y: 448, c: "#d4d4d4", d: "2.2s" },
+  { x: 28, y: 658, c: "#ffffff", d: "0.6s" },
+  { x: 402, y: 722, c: "#a3a3a3", d: "1.7s" },
+  { x: 200, y: 58, c: "#d4d4d4", d: "0.3s" },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -115,11 +116,11 @@ export function LoginPage() {
         .lp-line   { stroke-dasharray:600; animation: lp-draw 2.5s ease-out forwards; }
         .lp-enter  { animation: lp-in .65s cubic-bezier(.22,1,.36,1) both; }
         .lp-btn:hover:not(:disabled) {
-          box-shadow: 0 6px 20px rgba(99,102,241,.45) !important;
+          box-shadow: 0 6px 20px rgba(0,0,0,.45) !important; /* Updated shadow to match black theme */
           transform: translateY(-1px);
         }
         .lp-btn:active:not(:disabled) { transform: translateY(0); }
-        .lp-eye:hover { color: #6366f1 !important; }
+        .lp-eye:hover { color: #000000 !important; } /* Updated hover color to black */
       `}</style>
 
       {/* ── LEFT PANEL ───────────────────────────────────────────────── */}
@@ -130,14 +131,14 @@ export function LoginPage() {
             "linear-gradient(158deg,#060b18 0%,#0c1535 48%,#080e22 100%)",
         }}
       >
-        {/* Glow orbs */}
+        {/* Glow orbs - Converted to subtle white/grey glows */}
         {[
           {
             t: "18%",
             l: "22%",
             sz: 360,
-            c: "99,102,241",
-            op: 0.18,
+            c: "255,255,255",
+            op: 0.08,
             dur: "5s",
             del: "0s",
           },
@@ -145,8 +146,8 @@ export function LoginPage() {
             b: "22%",
             r: "8%",
             sz: 260,
-            c: "14,165,233",
-            op: 0.14,
+            c: "200,200,200",
+            op: 0.06,
             dur: "6s",
             del: "1.6s",
           },
@@ -154,8 +155,8 @@ export function LoginPage() {
             t: "62%",
             l: "4%",
             sz: 200,
-            c: "168,85,247",
-            op: 0.12,
+            c: "255,255,255",
+            op: 0.05,
             dur: "7s",
             del: "3.1s",
           },
@@ -187,17 +188,18 @@ export function LoginPage() {
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
+            {/* Gradients updated to greyscale */}
             <linearGradient id="lp-lg1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#6366f1" stopOpacity=".55" />
-              <stop offset="100%" stopColor="#0ea5e9" stopOpacity=".18" />
+              <stop offset="0%" stopColor="#ffffff" stopOpacity=".55" />
+              <stop offset="100%" stopColor="#737373" stopOpacity=".18" />
             </linearGradient>
             <linearGradient id="lp-lg2" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#a855f7" stopOpacity=".45" />
-              <stop offset="100%" stopColor="#6366f1" stopOpacity=".12" />
+              <stop offset="0%" stopColor="#d4d4d4" stopOpacity=".45" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity=".12" />
             </linearGradient>
             <radialGradient id="lp-ng" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#6366f1" stopOpacity=".9" />
-              <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+              <stop offset="0%" stopColor="#ffffff" stopOpacity=".9" />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
             </radialGradient>
             <filter id="lp-gf">
               <feGaussianBlur stdDeviation="2.5" result="b" />
@@ -251,7 +253,7 @@ export function LoginPage() {
                 cx={n.x}
                 cy={n.y}
                 r="3"
-                fill="#6366f1"
+                fill="#ffffff"
                 filter="url(#lp-gf)"
                 className="lp-node"
                 style={{ animationDelay: `${i * 0.28}s` }}
@@ -259,7 +261,7 @@ export function LoginPage() {
             </g>
           ))}
 
-          {/* Floating hexagon */}
+          {/* Floating hexagon - converted to white/grey */}
           <g
             style={{
               animation: "lp-float-a 9s ease-in-out infinite",
@@ -269,18 +271,18 @@ export function LoginPage() {
             <polygon
               points="295,144 339,169 339,219 295,244 251,219 251,169"
               fill="none"
-              stroke="rgba(99,102,241,.28)"
+              stroke="rgba(255,255,255,.28)"
               strokeWidth="1.5"
             />
             <polygon
               points="295,163 323,178 323,210 295,225 267,210 267,178"
-              fill="rgba(99,102,241,.04)"
-              stroke="rgba(99,102,241,.13)"
+              fill="rgba(255,255,255,.04)"
+              stroke="rgba(255,255,255,.13)"
               strokeWidth="1"
             />
           </g>
 
-          {/* Floating dashed ring cluster */}
+          {/* Floating dashed ring cluster - converted to white/grey */}
           <g
             style={{
               animation: "lp-float-b 11s ease-in-out infinite",
@@ -292,7 +294,7 @@ export function LoginPage() {
               cy="400"
               r="50"
               fill="none"
-              stroke="rgba(168,85,247,.22)"
+              stroke="rgba(255,255,255,.22)"
               strokeWidth="1.5"
               strokeDasharray="5 4"
             />
@@ -301,13 +303,13 @@ export function LoginPage() {
               cy="400"
               r="31"
               fill="none"
-              stroke="rgba(168,85,247,.11)"
+              stroke="rgba(255,255,255,.11)"
               strokeWidth="1"
             />
-            <circle cx="108" cy="400" r="6" fill="rgba(168,85,247,.38)" />
+            <circle cx="108" cy="400" r="6" fill="rgba(255,255,255,.38)" />
           </g>
 
-          {/* Floating diamond */}
+          {/* Floating diamond - converted to white/grey */}
           <g
             style={{
               animation: "lp-float-c 13s ease-in-out infinite",
@@ -317,18 +319,18 @@ export function LoginPage() {
             <polygon
               points="372,541 412,581 372,621 332,581"
               fill="none"
-              stroke="rgba(14,165,233,.24)"
+              stroke="rgba(255,255,255,.24)"
               strokeWidth="1.5"
             />
             <polygon
               points="372,558 396,581 372,604 348,581"
-              fill="rgba(14,165,233,.05)"
-              stroke="rgba(14,165,233,.14)"
+              fill="rgba(255,255,255,.05)"
+              stroke="rgba(255,255,255,.14)"
               strokeWidth="1"
             />
           </g>
 
-          {/* Slow-spinning rings */}
+          {/* Slow-spinning rings - converted to white */}
           <g
             style={{
               animation: "lp-spin 32s linear infinite",
@@ -340,7 +342,7 @@ export function LoginPage() {
               cy="390"
               r="142"
               fill="none"
-              stroke="rgba(99,102,241,.055)"
+              stroke="rgba(255,255,255,.055)"
               strokeWidth="1"
               strokeDasharray="3 9"
             />
@@ -356,7 +358,7 @@ export function LoginPage() {
               cy="390"
               r="112"
               fill="none"
-              stroke="rgba(14,165,233,.045)"
+              stroke="rgba(255,255,255,.045)"
               strokeWidth="1"
               strokeDasharray="4 13"
             />
@@ -377,7 +379,7 @@ export function LoginPage() {
           ))}
         </svg>
 
-        {/* Bottom wordmark */}
+        {/* Bottom wordmark - Updated for monochrome contrast */}
         <div
           style={{
             position: "absolute",
@@ -393,18 +395,18 @@ export function LoginPage() {
               width: 30,
               height: 30,
               borderRadius: 8,
-              background: "rgba(99,102,241,.18)",
-              border: "1px solid rgba(99,102,241,.28)",
+              background: "rgba(255,255,255,.10)",
+              border: "1px solid rgba(255,255,255,.20)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <GraduationCap size={14} color="rgba(99,102,241,.9)" />
+            <GraduationCap size={14} color="rgba(255,255,255,.9)" />
           </div>
           <span
             style={{
-              color: "rgba(255,255,255,.28)",
+              color: "rgba(255,255,255,.45)",
               fontSize: 11,
               letterSpacing: "0.2em",
               fontWeight: 500,
@@ -446,7 +448,9 @@ export function LoginPage() {
                   width: 36,
                   height: 3,
                   borderRadius: 2,
-                  background: "linear-gradient(90deg,#6366f1,#0ea5e9)",
+                  background:
+                    "linear-gradient(90deg, #121212 0%, #4a4a4a 100%)",
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
                 }}
               />
               <div
@@ -454,7 +458,9 @@ export function LoginPage() {
                   width: 12,
                   height: 3,
                   borderRadius: 2,
-                  background: "linear-gradient(90deg,#0ea5e9,#a855f7)",
+                  background:
+                    "linear-gradient(90deg, #1c1c1c 0%, #5a5a5a 100%)",
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
                 }}
               />
             </div>
@@ -471,7 +477,7 @@ export function LoginPage() {
               Welcome back
             </h1>
             <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.6 }}>
-              Sign in to access your school dashboard
+              Sign in to your school dashboard
             </p>
           </div>
 
@@ -593,11 +599,10 @@ export function LoginPage() {
                 fontWeight: 600,
                 letterSpacing: "0.025em",
                 marginTop: 4,
-                background: loading
-                  ? undefined
-                  : "linear-gradient(135deg,#6366f1 0%,#4f46e5 100%)",
+                color: "#ffffff",
+                background: loading ? undefined : "#000000",
                 border: "none",
-                boxShadow: loading ? "none" : "0 4px 16px rgba(99,102,241,.32)",
+                boxShadow: loading ? "none" : "0 4px 12px rgba(0, 0, 0, 0.15)",
                 transition: "box-shadow .2s, transform .15s",
               }}
             >
