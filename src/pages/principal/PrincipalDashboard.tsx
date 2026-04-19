@@ -233,36 +233,6 @@ export function PrincipalDashboard() {
       ) : (
         <div className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Gender Distribution */}
-            <Card className="md:col-span-2 lg:col-span-1">
-              <CardHeader>
-                <CardTitle>Student Gender Demographics (%)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[250px] flex items-center justify-center pb-4">
-                  {genderChartData ? (
-                    <Bar
-                      data={genderChartData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                          y: {
-                            beginAtZero: true,
-                            max: 100,
-                            title: { display: true, text: "Percentage (%)" },
-                          },
-                        },
-                      }}
-                    />
-                  ) : (
-                    <p className="text-muted-foreground">No data available</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Subject Distribution */}
             <Card className="md:col-span-2 lg:col-span-2">
               <CardHeader>
@@ -286,6 +256,36 @@ export function PrincipalDashboard() {
                                 return ` ${full || c.label}: ${c.raw}%`;
                               },
                             },
+                          },
+                        },
+                      }}
+                    />
+                  ) : (
+                    <p className="text-muted-foreground">No data available</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Gender Distribution */}
+            <Card className="md:col-span-2 lg:col-span-1">
+              <CardHeader>
+                <CardTitle>Student Gender Demographics (%)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[250px] flex items-center justify-center pb-4">
+                  {genderChartData ? (
+                    <Bar
+                      data={genderChartData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: { display: true, text: "Percentage (%)" },
                           },
                         },
                       }}
