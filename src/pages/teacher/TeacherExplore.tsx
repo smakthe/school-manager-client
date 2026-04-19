@@ -5,7 +5,8 @@ import { teacherDashboardApi } from "../../api/teacher/dashboard";
 import { TeacherClassroomView } from "./explore/TeacherClassroomView";
 
 export function TeacherExplore() {
-  const { homeroom: storeHomeroom, setHomeroom: setStoreHomeroom } = useTeacherStore();
+  const { homeroom: storeHomeroom, setHomeroom: setStoreHomeroom } =
+    useTeacherStore();
   const [homeroom, setHomeroom] = useState<any>(storeHomeroom ?? null);
   const [loading, setLoading] = useState(true);
 
@@ -60,11 +61,6 @@ export function TeacherExplore() {
 
   return (
     <div className="space-y-6 pb-12">
-      <PageHeader
-        title="My Classroom"
-        description={`Managing Class ${homeroom.display_name}`}
-      />
-
       <TeacherClassroomView homeroom={homeroom} />
     </div>
   );

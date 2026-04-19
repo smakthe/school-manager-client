@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import { teacherStudentsApi } from "../../../api/teacher/students";
-import { apiFetch } from "../../../api/client";
 import {
   Card,
   CardContent,
@@ -181,7 +180,6 @@ interface Homeroom {
 
 export function TeacherClassroomView({ homeroom }: { homeroom: Homeroom }) {
   const [students, setStudents] = useState<any[]>([]);
-  const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -202,12 +200,6 @@ export function TeacherClassroomView({ homeroom }: { homeroom: Homeroom }) {
         page++;
       } while (page <= total);
       setStudents(allStudents);
-
-      // Fetch subject assignments for this classroom (read-only)
-      const assignRes = await apiFetch<any>(
-        `/teacher/teacher_subject_assignments?classroom_id=${homeroom.id}`,
-      ).catch(() => ({ data: [] }));
-      setAssignments(assignRes.data || []);
     } finally {
       setLoading(false);
     }
@@ -246,7 +238,7 @@ export function TeacherClassroomView({ homeroom }: { homeroom: Homeroom }) {
               <BookOpen className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardDescription>Your Homeroom</CardDescription>
+              <CardDescription>Your classroom</CardDescription>
               <CardTitle className="text-2xl">
                 Class {homeroom.display_name}
               </CardTitle>
@@ -291,29 +283,6 @@ export function TeacherClassroomView({ homeroom }: { homeroom: Homeroom }) {
           </CardContent>
         </Card>
       </div>
-
-      {/* ── Subject Assignments (read-only) ───────────────────────────────── */}
-      {assignments.length > 0 && (
-        <div>
-          <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
-            <BookOpen className="h-5 w-5" /> Subject Teachers
-          </h3>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {assignments.map((a) => (
-              <Card key={a.id}>
-                <CardHeader className="p-4 pb-2">
-                  <CardTitle className="text-base">
-                    {a.attributes.subject?.name || "Subject"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 pt-0 text-sm text-muted-foreground">
-                  {a.attributes.teacher?.name || "Unknown"}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* ── Enrolled Students ─────────────────────────────────────────────── */}
       <div>

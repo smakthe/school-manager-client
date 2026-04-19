@@ -3,7 +3,7 @@ import { useAuthStore } from "../../stores/authStore";
 import { useTeacherStore } from "../../stores/teacherStore";
 import { teacherDashboardApi } from "../../api/teacher/dashboard";
 import { PageHeader } from "../../components/shared/PageHeader";
-import { StatCard } from "../../components/shared/StatCard";
+// import { StatCard } from "../../components/shared/StatCard";
 import {
   Card,
   CardContent,
@@ -19,7 +19,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { Users, BookOpen, LayoutGrid } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -125,11 +125,11 @@ export function TeacherDashboard() {
   const { user } = useAuthStore();
   const { setHomeroom } = useTeacherStore();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    taught_classrooms: 0,
-    total_students: 0,
-    total_subjects: 0,
-  });
+  // const [stats, setStats] = useState({
+  //   taught_classrooms: 0,
+  //   total_students: 0,
+  //   total_subjects: 0,
+  // });
   const [homeroom, setLocalHomeroom] = useState<any>(null);
   const [performance, setPerformance] = useState<any[]>([]);
   const [roster, setRoster] = useState<RosterItem[]>([]);
@@ -146,7 +146,7 @@ export function TeacherDashboard() {
       setLoading(true);
       try {
         const res = await teacherDashboardApi.getStats();
-        setStats(res.totals);
+        // setStats(res.totals);
         setHomeroom(res.homeroom ?? null);
         setLocalHomeroom(res.homeroom);
         setPerformance(res.subject_performance || []);
@@ -245,28 +245,6 @@ export function TeacherDashboard() {
         title="My Dashboard"
         description="Your classes, roster, and student performance."
       />
-
-      {/* Stat cards */}
-      <div className="grid gap-4 md:grid-cols-3 mb-2">
-        <StatCard
-          title="Classes"
-          value={stats.taught_classrooms}
-          icon={<LayoutGrid className="h-4 w-4" />}
-          loading={loading}
-        />
-        <StatCard
-          title="Total Students"
-          value={stats.total_students}
-          icon={<Users className="h-4 w-4" />}
-          loading={loading}
-        />
-        <StatCard
-          title="Subjects Assigned"
-          value={stats.total_subjects}
-          icon={<BookOpen className="h-4 w-4" />}
-          loading={loading}
-        />
-      </div>
 
       {loading ? (
         <div className="flex h-64 items-center justify-center">
