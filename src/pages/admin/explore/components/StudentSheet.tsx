@@ -30,26 +30,31 @@ interface StudentSheetProps {
   student: any | null;
   onClose: () => void;
   onEdit: (student: any) => void;
+  /** Override the marks fetch URL prefix. Defaults to /admin/marks?student_id= */
+  marksEndpoint?: string;
 }
 
-export function StudentSheet({ student, onClose, onEdit }: StudentSheetProps) {
+export function StudentSheet({
+  student,
+  onClose,
+  onEdit,
+  marksEndpoint = "/admin/marks?student_id=",
+}: StudentSheetProps) {
   const [marks, setMarks] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (student) {
       setLoading(true);
-      // Fetch all marks for this specific student
-      apiFetch(`/admin/marks?student_id=${student.id}`)
+      apiFetch(`${marksEndpoint}${student.id}`)
         .then((res: any) => setMarks(res.data || []))
         .catch((err) => console.error("Failed to fetch academic records", err))
         .finally(() => setLoading(false));
     } else {
       setMarks([]);
     }
-  }, [student]);
+  }, [student, marksEndpoint]);
 
-  // Helper to nicely format the term enum (e.g., "term1" -> "Term 1")
   const formatTerm = (term: string) => {
     if (!term) return "Unknown";
     return term.replace("term", "Term ");
@@ -69,9 +74,7 @@ export function StudentSheet({ student, onClose, onEdit }: StudentSheetProps) {
                 <span className="text-sm font-semibold text-foreground">
                   Class {student.attributes.current_class_display}
                 </span>
-                <span>
-                  Admission No: {student.attributes.admission_number}
-                </span>
+                <span>Admission No: {student.attributes.admission_number}</span>
               </SheetDescription>
               <div className="flex gap-2 mt-4">
                 <Badge
@@ -124,7 +127,7 @@ export function StudentSheet({ student, onClose, onEdit }: StudentSheetProps) {
               <TabsContent value="academic" className="mt-6">
                 {loading ? (
                   <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : marks.length > 0 ? (
                   <div className="rounded-md border bg-card">

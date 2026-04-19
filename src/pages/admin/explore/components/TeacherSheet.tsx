@@ -29,23 +29,31 @@ interface TeacherSheetProps {
   teacher: any | null;
   onClose: () => void;
   onEdit: (teacher: any) => void;
+  /** Override the assignments fetch URL prefix.
+   *  Defaults to /admin/teacher_subject_assignments?teacher_id= */
+  assignmentsEndpoint?: string;
 }
 
-export function TeacherSheet({ teacher, onClose, onEdit }: TeacherSheetProps) {
+export function TeacherSheet({
+  teacher,
+  onClose,
+  onEdit,
+  assignmentsEndpoint = "/admin/teacher_subject_assignments?teacher_id=",
+}: TeacherSheetProps) {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (teacher) {
       setLoading(true);
-      apiFetch(`/admin/teacher_subject_assignments?teacher_id=${teacher.id}`)
+      apiFetch(`${assignmentsEndpoint}${teacher.id}`)
         .then((res: any) => setAssignments(res.data || []))
         .catch((err) => console.error("Failed to fetch assignments", err))
         .finally(() => setLoading(false));
     } else {
       setAssignments([]);
     }
-  }, [teacher]);
+  }, [teacher, assignmentsEndpoint]);
 
   const isPrincipal = teacher?.attributes?.type === "Principal";
 
@@ -62,9 +70,7 @@ export function TeacherSheet({ teacher, onClose, onEdit }: TeacherSheetProps) {
               }`}
             >
               <SheetTitle
-                className={`text-2xl flex items-center gap-2 ${
-                  isPrincipal ? "text-amber-950" : ""
-                }`}
+                className={`text-2xl flex items-center gap-2 ${isPrincipal ? "text-amber-950" : ""}`}
               >
                 <Users
                   className={`h-6 w-6 ${isPrincipal ? "text-amber-900" : "text-primary"}`}
@@ -73,7 +79,6 @@ export function TeacherSheet({ teacher, onClose, onEdit }: TeacherSheetProps) {
                   ? `Principal ${teacher.attributes.name}`
                   : teacher.attributes.name}
               </SheetTitle>
-
               <SheetDescription
                 className={isPrincipal ? "text-amber-900/80 font-medium" : ""}
               >
@@ -118,7 +123,7 @@ export function TeacherSheet({ teacher, onClose, onEdit }: TeacherSheetProps) {
               <TabsContent value="assignments" className="mt-6">
                 {loading ? (
                   <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : assignments.length > 0 ? (
                   <div className="rounded-md border bg-card">
