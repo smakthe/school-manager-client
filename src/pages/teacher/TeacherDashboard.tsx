@@ -222,7 +222,7 @@ export function TeacherDashboard() {
       {/* Greeting */}
       <div className="rounded-xl border bg-card px-6 py-5 shadow-sm">
         <h1 className="text-2xl font-semibold tracking-tight">
-          {getGreeting()}, {user?.name || "Teacher"} 👋
+          {getGreeting()}, {user?.name || "Teacher"}
         </h1>
         <p className="mt-1 text-muted-foreground">
           Welcome back to{" "}
