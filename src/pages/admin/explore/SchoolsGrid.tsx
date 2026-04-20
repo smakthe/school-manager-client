@@ -1,4 +1,11 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { schoolsApi } from "../../../api/admin/schools";
 import {
   Card,
@@ -7,8 +14,7 @@ import {
   CardTitle,
 } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Search, Edit, Trash2, Plus, GraduationCap, Building2, Users } from "lucide-react";
+import { Edit, Trash2, GraduationCap, Building2, Users } from "lucide-react";
 import { SchoolFormModal } from "../modals/SchoolFormModal";
 import { ConfirmDialog } from "../../../components/shared/ConfirmDialog";
 import {
@@ -57,16 +63,18 @@ const BOARDS = [
   },
 ];
 
-export function SchoolsGrid({
-  onSelectSchool,
-}: {
-  onSelectSchool: (school: any) => void;
-}) {
+export interface SchoolsGridRef {
+  openAddModal: () => void;
+}
+
+export const SchoolsGrid = forwardRef<
+  SchoolsGridRef,
+  { onSelectSchool: (school: any) => void }
+>(({ onSelectSchool }, ref) => {
   const [schools, setSchools] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMoreSchools, setLoadingMoreSchools] = useState(false);
   const [schoolMeta, setSchoolMeta] = useState<any>({ page: 1, pages: 1 });
-  const [searchQuery, setSearchQuery] = useState("");
   const [activeBoards, setActiveBoards] = useState<string[]>(
     BOARDS.map((b) => b.id),
   );
@@ -84,6 +92,13 @@ export function SchoolsGrid({
 
   const observer = useRef<IntersectionObserver | null>(null);
   const isFetchingRef = useRef(false);
+
+  useImperativeHandle(ref, () => ({
+    openAddModal: () => {
+      setEditingSchool(null);
+      setIsModalOpen(true);
+    },
+  }));
 
   const fetchSchools = useCallback(
     async (page = 1, boards = activeBoards) => {
@@ -143,18 +158,6 @@ export function SchoolsGrid({
     [schoolMeta.page, schoolMeta.pages, fetchSchools, activeBoards],
   );
 
-  const filteredSchools = useMemo(
-    () =>
-      schools.filter(
-        (s) =>
-          s.attributes.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          s.attributes.subdomain
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()),
-      ),
-    [schools, searchQuery],
-  );
-
   const confirmDelete = async () => {
     if (!deleteConfig.entity) return;
     setDeleteConfig((prev) => ({ ...prev, loading: true }));
@@ -181,34 +184,16 @@ export function SchoolsGrid({
 
   return (
     <div className="space-y-6">
-      {/* Search and Action Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full justify-between items-center bg-card p-4 rounded-xl border shadow-sm">
-        <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search schools by name or subdomain..."
-            className="pl-9 bg-background"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <Button
-          className="w-full sm:w-auto shadow-sm"
-          onClick={() => {
-            setEditingSchool(null);
-            setIsModalOpen(true);
-          }}
-        >
-          <Plus className="mr-2 h-4 w-4" /> Add School
-        </Button>
-      </div>
-
       {/* Toggles */}
       <TooltipProvider>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {BOARDS.map((board) => {
             const isActive = activeBoards.includes(board.id);
-            const stats = boardStats[board.id] || { schools: 0, teachers: 0, students: 0 };
+            const stats = boardStats[board.id] || {
+              schools: 0,
+              teachers: 0,
+              students: 0,
+            };
 
             return (
               <div
@@ -239,7 +224,9 @@ export function SchoolsGrid({
 
                 <div
                   className={`flex w-full justify-evenly items-center mt-3 pt-2 text-xs border-t transition-colors ${
-                    isActive ? "border-current/20" : "border-muted-foreground/20"
+                    isActive
+                      ? "border-current/20"
+                      : "border-muted-foreground/20"
                   }`}
                 >
                   <Tooltip>
@@ -284,27 +271,18 @@ export function SchoolsGrid({
             Please activate at least one board filter above to view the schools.
           </p>
         </div>
-      ) : filteredSchools.length === 0 ? (
+      ) : schools.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed rounded-xl bg-muted/5">
           <GraduationCap className="h-12 w-12 text-muted-foreground/30 mb-4" />
           <h3 className="text-lg font-semibold">No schools found</h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-            There are no schools matching your active filters and search query.
+            There are no schools matching your active filters.
           </p>
-          {searchQuery && (
-            <Button
-              variant="link"
-              onClick={() => setSearchQuery("")}
-              className="mt-2"
-            >
-              Clear search
-            </Button>
-          )}
         </div>
       ) : (
         <>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredSchools.map((school, index) => {
+            {schools.map((school, index) => {
               const style = getBoardStyle(school.attributes.board);
               const card = (
                 <Card
@@ -361,7 +339,7 @@ export function SchoolsGrid({
                   </CardContent>
                 </Card>
               );
-              return filteredSchools.length === index + 1 ? (
+              return schools.length === index + 1 ? (
                 <div ref={lastElementRef} key={school.id} className="h-full">
                   {card}
                 </div>
@@ -400,4 +378,4 @@ export function SchoolsGrid({
       />
     </div>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { teacherStudentsApi } from "../../../api/teacher/students";
 import {
   Card,
@@ -181,7 +181,6 @@ interface Homeroom {
 export function TeacherClassroomView({ homeroom }: { homeroom: Homeroom }) {
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const [viewingStudent, setViewingStudent] = useState<any>(null);
   const [editingStudent, setEditingStudent] = useState<any>(null);
@@ -208,18 +207,6 @@ export function TeacherClassroomView({ homeroom }: { homeroom: Homeroom }) {
   useEffect(() => {
     fetchClassDetails();
   }, [homeroom.id]);
-
-  const filteredStudents = useMemo(
-    () =>
-      students.filter(
-        (s) =>
-          s.attributes.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          s.attributes.admission_number
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()),
-      ),
-    [students, searchQuery],
-  );
 
   if (loading)
     return (
@@ -290,20 +277,14 @@ export function TeacherClassroomView({ homeroom }: { homeroom: Homeroom }) {
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <GraduationCap className="h-5 w-5" /> Enrolled Students
           </h3>
-          <Input
-            placeholder="Search by name or admission no..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="sm:w-72"
-          />
         </div>
-        {filteredStudents.length === 0 ? (
+        {students.length === 0 ? (
           <p className="py-10 text-center text-muted-foreground">
             No students found.
           </p>
         ) : (
           <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8">
-            {filteredStudents.map((s) => (
+            {students.map((s) => (
               <div
                 key={s.id}
                 className="relative flex flex-col p-4 border rounded-md bg-card hover:border-primary hover:shadow-sm cursor-pointer group transition-all"

@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
 import {
   Tabs,
   TabsContent,
@@ -41,12 +40,6 @@ export function SchoolTabs({
   const [loading, setLoading] = useState(true);
   const [loadingMoreStudents, setLoadingMoreStudents] = useState(false);
   const [studentMeta, setStudentMeta] = useState<any>({ page: 1, pages: 1 });
-
-  const [searchQueries, setSearchQueries] = useState({
-    class: "",
-    student: "",
-    teacher: "",
-  });
 
   const [modals, setModals] = useState({
     class: false,
@@ -191,15 +184,7 @@ export function SchoolTabs({
         </TabsList>
 
         <TabsContent value="classrooms" className="space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <Input
-              placeholder="Search classrooms..."
-              value={searchQueries.class}
-              onChange={(e) =>
-                setSearchQueries({ ...searchQueries, class: e.target.value })
-              }
-              className="sm:w-96"
-            />
+          <div className="flex justify-end gap-4">
             <Button
               onClick={() => {
                 setEditing({ ...editing, class: null });
@@ -210,13 +195,7 @@ export function SchoolTabs({
             </Button>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {classrooms
-              .filter((c) =>
-                c.attributes.display_name
-                  .toLowerCase()
-                  .includes(searchQueries.class.toLowerCase()),
-              )
-              .map((c) => (
+            {classrooms.map((c) => (
                 <Card
                   key={c.id}
                   className="cursor-pointer hover:border-primary transition-colors group"
@@ -282,15 +261,7 @@ export function SchoolTabs({
         </TabsContent>
 
         <TabsContent value="students" className="space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <Input
-              placeholder="Search students..."
-              value={searchQueries.student}
-              onChange={(e) =>
-                setSearchQueries({ ...searchQueries, student: e.target.value })
-              }
-              className="sm:w-96"
-            />
+          <div className="flex justify-end gap-4">
             <Button
               onClick={() => {
                 setEditing({ ...editing, student: null });
@@ -301,13 +272,7 @@ export function SchoolTabs({
             </Button>
           </div>
           <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8">
-            {students
-              .filter((s) =>
-                s.attributes.name
-                  .toLowerCase()
-                  .includes(searchQueries.student.toLowerCase()),
-              )
-              .map((s, i, arr) => (
+            {students.map((s, i, arr) => (
                 <div
                   ref={arr.length === i + 1 ? lastStudentRef : null}
                   key={s.id}
@@ -366,15 +331,7 @@ export function SchoolTabs({
         </TabsContent>
 
         <TabsContent value="teachers" className="space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <Input
-              placeholder="Search staff..."
-              value={searchQueries.teacher}
-              onChange={(e) =>
-                setSearchQueries({ ...searchQueries, teacher: e.target.value })
-              }
-              className="sm:w-96"
-            />
+          <div className="flex justify-end gap-4">
             <Button
               onClick={() => {
                 setEditing({ ...editing, teacher: null });
@@ -386,11 +343,6 @@ export function SchoolTabs({
           </div>
           <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
             {teachers
-              .filter((t) =>
-                t.attributes.name
-                  .toLowerCase()
-                  .includes(searchQueries.teacher.toLowerCase()),
-              )
               .sort((a, b) => {
                 if (
                   a.attributes.type === "Principal" &&

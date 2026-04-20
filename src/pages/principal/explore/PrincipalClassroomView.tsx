@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { principalStudentsApi } from "../../../api/principal/students";
 import { principalTeachersApi } from "../../../api/principal/teachers";
 import { apiFetch } from "../../../api/client";
@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
 import { Separator } from "../../../components/ui/separator";
 import {
   Users,
@@ -38,7 +37,6 @@ export function PrincipalClassroomView({
   const [teacher, setTeacher] = useState<any | null>(null);
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const [modals, setModals] = useState({
     student: false,
@@ -90,13 +88,6 @@ export function PrincipalClassroomView({
     fetchClassDetails();
   }, [classroom.id]);
 
-  const filteredStudents = useMemo(
-    () =>
-      students.filter((s) =>
-        s.attributes.name.toLowerCase().includes(searchQuery.toLowerCase()),
-      ),
-    [students, searchQuery],
-  );
 
   const confirmDelete = async () => {
     setDeleteConfig((prev: any) => ({ ...prev, loading: true }));
@@ -205,25 +196,17 @@ export function PrincipalClassroomView({
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <GraduationCap className="h-5 w-5" /> Enrolled Students
           </h3>
-          <div className="flex gap-4">
-            <Input
-              placeholder="Search students..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-64"
-            />
-            <Button
-              onClick={() => {
-                setEditing({ ...editing, student: null });
-                setModals({ ...modals, student: true });
-              }}
-            >
-              <Plus className="mr-2 h-4 w-4" /> Add
-            </Button>
-          </div>
+          <Button
+            onClick={() => {
+              setEditing({ ...editing, student: null });
+              setModals({ ...modals, student: true });
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add
+          </Button>
         </div>
         <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8">
-          {filteredStudents.map((s) => (
+          {students.map((s) => (
             <div
               key={s.id}
               className="relative flex flex-col p-4 border rounded-md bg-card hover:border-primary hover:shadow-sm cursor-pointer group transition-all"
