@@ -16,42 +16,42 @@ export function Explore() {
     <div className="space-y-6 relative pb-12">
       <PageHeader
         title="Explore"
-        description="Manage schools, classrooms and personnel."
+        description="Manage schools, classrooms, teachers and students."
       />
 
       {/* Breadcrumbs Navigation */}
       <div className="flex items-center justify-between pb-4 border-b">
         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-        <button
-          onClick={() => {
-            setSelectedSchool(null);
-            setSelectedClassroom(null);
-          }}
-          className={`hover:text-primary transition-colors ${!selectedSchool ? "font-semibold text-foreground" : ""}`}
-        >
-          All Schools
-        </button>
+          <button
+            onClick={() => {
+              setSelectedSchool(null);
+              setSelectedClassroom(null);
+            }}
+            className={`hover:text-primary transition-colors ${!selectedSchool ? "font-semibold text-foreground" : ""}`}
+          >
+            All Schools
+          </button>
 
-        {selectedSchool && (
-          <>
-            <ChevronRight className="h-4 w-4" />
-            <button
-              onClick={() => setSelectedClassroom(null)}
-              className={`hover:text-primary transition-colors ${!selectedClassroom ? "font-semibold text-foreground" : ""}`}
-            >
-              {selectedSchool.attributes.name}
-            </button>
-          </>
-        )}
+          {selectedSchool && (
+            <>
+              <ChevronRight className="h-4 w-4" />
+              <button
+                onClick={() => setSelectedClassroom(null)}
+                className={`hover:text-primary transition-colors ${!selectedClassroom ? "font-semibold text-foreground" : ""}`}
+              >
+                {selectedSchool.attributes.name}
+              </button>
+            </>
+          )}
 
-        {selectedClassroom && (
-          <>
-            <ChevronRight className="h-4 w-4" />
-            <span className="font-semibold text-foreground">
-              Class {selectedClassroom.attributes.display_name}
-            </span>
-          </>
-        )}
+          {selectedClassroom && (
+            <>
+              <ChevronRight className="h-4 w-4" />
+              <span className="font-semibold text-foreground">
+                Class {selectedClassroom.attributes.display_name}
+              </span>
+            </>
+          )}
         </div>
 
         {!selectedSchool && (

@@ -146,7 +146,12 @@ export function PrincipalTabs({
         await fetchTeachers();
       }
     } finally {
-      setDeleteConfig({ isOpen: false, type: null, entity: null, loading: false });
+      setDeleteConfig({
+        isOpen: false,
+        type: null,
+        entity: null,
+        loading: false,
+      });
     }
   };
 
@@ -186,67 +191,67 @@ export function PrincipalTabs({
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {classrooms.map((c) => (
-                <Card
-                  key={c.id}
-                  className="cursor-pointer hover:border-primary transition-colors group"
-                  onClick={() => onSelectClassroom(c)}
-                >
-                  <CardHeader className="flex flex-row justify-between pb-2">
-                    <CardTitle className="text-xl">
-                      {c.attributes.display_name}
-                    </CardTitle>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100">
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditing({ ...editing, class: c });
-                          setModals({ ...modals, class: true });
-                        }}
-                      >
-                        <Edit className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteConfig({
-                            isOpen: true,
-                            type: "class",
-                            entity: c,
-                          });
-                        }}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-1.5 mt-4 pt-4 border-t border-dashed text-sm">
-                      <p className="flex justify-between">
-                        <span className="text-muted-foreground">
-                          Class Teacher
-                        </span>{" "}
-                        <span className="font-medium truncate ml-2 text-right">
-                          {c.attributes.class_teacher?.name || "Not Assigned"}
-                        </span>
-                      </p>
-                      <p className="flex justify-between">
-                        <span className="text-muted-foreground">
-                          Student Strength
-                        </span>{" "}
-                        <span className="font-medium">
-                          {c.attributes.students_count || 0}
-                        </span>
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              <Card
+                key={c.id}
+                className="cursor-pointer hover:border-primary transition-colors group"
+                onClick={() => onSelectClassroom(c)}
+              >
+                <CardHeader className="flex flex-row justify-between pb-2">
+                  <CardTitle className="text-xl">
+                    {c.attributes.display_name}
+                  </CardTitle>
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditing({ ...editing, class: c });
+                        setModals({ ...modals, class: true });
+                      }}
+                    >
+                      <Edit className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteConfig({
+                          isOpen: true,
+                          type: "class",
+                          entity: c,
+                        });
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-1.5 mt-4 pt-4 border-t border-dashed text-sm">
+                    <p className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Class Teacher
+                      </span>{" "}
+                      <span className="font-medium truncate ml-2 text-right">
+                        {c.attributes.class_teacher?.name || "Not Assigned"}
+                      </span>
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Student Strength
+                      </span>{" "}
+                      <span className="font-medium">
+                        {c.attributes.students_count || 0}
+                      </span>
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </TabsContent>
 
@@ -264,54 +269,51 @@ export function PrincipalTabs({
           </div>
           <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8">
             {students.map((s, i, arr) => (
-                <div
-                  ref={arr.length === i + 1 ? lastStudentRef : null}
-                  key={s.id}
-                  className="relative flex flex-col p-4 border rounded-md bg-card hover:border-primary hover:shadow-sm cursor-pointer group transition-all"
-                  onClick={() => setViewingStudent(s)}
-                >
-                  <div className="pr-2">
-                    <p
-                      className="font-medium truncate"
-                      title={s.attributes.name}
-                    >
-                      {s.attributes.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1 truncate">
-                      {s.attributes.admission_number}
-                    </p>
-                  </div>
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-card/90 backdrop-blur-sm rounded-md shadow-sm">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditing({ ...editing, student: s });
-                        setModals({ ...modals, student: true });
-                      }}
-                    >
-                      <Edit className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 hover:text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteConfig({
-                          isOpen: true,
-                          type: "student",
-                          entity: s,
-                        });
-                      }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
+              <div
+                ref={arr.length === i + 1 ? lastStudentRef : null}
+                key={s.id}
+                className="relative flex flex-col p-4 border rounded-md bg-card hover:border-primary hover:shadow-sm cursor-pointer group transition-all"
+                onClick={() => setViewingStudent(s)}
+              >
+                <div className="pr-2">
+                  <p className="font-medium truncate" title={s.attributes.name}>
+                    {s.attributes.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1 truncate">
+                    {s.attributes.admission_number}
+                  </p>
                 </div>
-              ))}
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-card/90 backdrop-blur-sm rounded-md shadow-sm">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditing({ ...editing, student: s });
+                      setModals({ ...modals, student: true });
+                    }}
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteConfig({
+                        isOpen: true,
+                        type: "student",
+                        entity: s,
+                      });
+                    }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
           {loadingMoreStudents && (
             <div className="flex justify-center py-6">
@@ -329,7 +331,7 @@ export function PrincipalTabs({
                 setModals({ ...modals, teacher: true });
               }}
             >
-              <Plus className="mr-2 h-4 w-4" /> Add Staff
+              <Plus className="mr-2 h-4 w-4" /> Add Teacher
             </Button>
           </div>
           <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
@@ -455,7 +457,12 @@ export function PrincipalTabs({
       <ConfirmDialog
         open={deleteConfig.isOpen}
         onCancel={() =>
-          setDeleteConfig({ isOpen: false, type: null, entity: null, loading: false })
+          setDeleteConfig({
+            isOpen: false,
+            type: null,
+            entity: null,
+            loading: false,
+          })
         }
         onConfirm={confirmDelete}
         title="Delete"

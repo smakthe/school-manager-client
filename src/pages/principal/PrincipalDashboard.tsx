@@ -201,7 +201,7 @@ export function PrincipalDashboard() {
 
       <PageHeader
         title="Dashboard"
-        description="Overview of your school's classrooms, students, and staff."
+        description="Overview of your school's classrooms, teachers and students."
       />
 
       {/* Stat cards */}

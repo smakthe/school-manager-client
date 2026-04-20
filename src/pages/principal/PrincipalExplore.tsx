@@ -11,7 +11,7 @@ export function PrincipalExplore() {
     <div className="space-y-6 pb-12">
       <PageHeader
         title="Explore"
-        description="Manage classrooms, students, and staff in your school."
+        description="Manage classrooms, teachers and students in your school."
       />
 
       {/* Breadcrumb */}
