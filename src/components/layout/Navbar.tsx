@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
 import { useThemeStore } from "../../stores/themeStore";
@@ -8,8 +9,10 @@ import {
   GraduationCap,
   LogOut,
   User as UserIcon,
+  Search,
 } from "lucide-react";
 import { Button } from "../ui/button";
+import { GlobalSearchModal } from "../shared/GlobalSearchModal";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import {
   DropdownMenu,
@@ -26,6 +29,21 @@ export function Navbar() {
   const { theme, setTheme } = useThemeStore();
   const { homeroom } = useTeacherStore();
   const location = useLocation();
+
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const placeholders = [
+    "Search \"Daughtry Principal\"",
+    "Search \"Tanisha Khan Bosco\"",
+    "Search \"Future Scholars IX C\"",
+    "Search \"VI-B class teacher\""
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % placeholders.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [placeholders.length]);
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -82,7 +100,22 @@ export function Navbar() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* Global Search Trigger */}
+        <div className="flex-1 flex justify-end md:justify-center mx-4 md:mx-8">
+          <Button
+            variant="outline"
+            className="w-full md:max-w-sm justify-start text-sm text-muted-foreground shadow-none bg-muted/30 border-muted-foreground/20 hover:bg-muted/50 rounded-full h-9 px-4 transition-all"
+            onClick={() => window.dispatchEvent(new Event("open-global-search"))}
+          >
+            <Search className="mr-2 h-4 w-4 shrink-0" />
+            <span className="truncate">{placeholders[placeholderIndex]}</span>
+            <span className="ml-auto flex shrink-0 items-center gap-1 leading-none text-xs hidden md:flex border bg-muted/60 px-1.5 py-0.5 rounded-sm opacity-70">
+              <span className="text-[10px]">⌘</span>K
+            </span>
+          </Button>
+        </div>
+
+        <div className="flex items-center gap-4 shrink-0">
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
             {theme === "dark" ? (
               <Moon className="h-5 w-5" />
@@ -143,6 +176,7 @@ export function Navbar() {
           </DropdownMenu>
         </div>
       </div>
+      <GlobalSearchModal />
     </header>
   );
 }
