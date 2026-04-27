@@ -261,7 +261,7 @@ export function TeacherDashboard() {
                   {uniqueClassrooms.length > 0 && (
                     <Select
                       value={selectedClassroom}
-                      onValueChange={setSelectedClassroom}
+                      onValueChange={(val) => setSelectedClassroom(val || "All Classes")}
                     >
                       <SelectTrigger className="h-8 w-40 text-xs">
                         <SelectValue placeholder="Filter by class" />
@@ -279,7 +279,7 @@ export function TeacherDashboard() {
                   {uniqueSubjects.length > 0 && (
                     <Select
                       value={selectedSubject}
-                      onValueChange={setSelectedSubject}
+                      onValueChange={(val) => setSelectedSubject(val || "All Subjects")}
                     >
                       <SelectTrigger className="h-8 w-40 text-xs">
                         <SelectValue placeholder="Filter by subject" />
@@ -543,7 +543,7 @@ export function TeacherDashboard() {
                                       onValueChange={(val) =>
                                         setPerfSubjectFilter((prev) => ({
                                           ...prev,
-                                          [tabKey]: val,
+                                          [tabKey]: val || "All Subjects",
                                         }))
                                       }
                                     >

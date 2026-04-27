@@ -139,7 +139,7 @@ export function ClassroomFormModal({ open, onOpenChange, classroomId, onSuccess 
               <Label>Class Teacher</Label>
               <Select
                 value={formData.class_teacher_id?.toString() || 'none'}
-                onValueChange={(val) => setFormData((prev) => ({ ...prev, class_teacher_id: val === 'none' ? undefined : parseInt(val) }))}
+                onValueChange={(val) => setFormData((prev) => ({ ...prev, class_teacher_id: val === 'none' || val === null ? undefined : parseInt(val as string) }))}
               >
                 <SelectTrigger><SelectValue placeholder="Select class teacher" /></SelectTrigger>
                 <SelectContent>
