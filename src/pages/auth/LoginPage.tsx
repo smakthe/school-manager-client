@@ -419,8 +419,7 @@ export function LoginPage() {
 
       {/* ── RIGHT PANEL ──────────────────────────────────────────────── */}
       <div
-        className="flex-1 flex items-center justify-center"
-        style={{ background: "#fff", padding: "48px 40px" }}
+        className="flex-1 flex items-center justify-center bg-background px-10 py-12"
       >
         <div className="lp-enter w-full" style={{ maxWidth: 400 }}>
           {/* Mobile logo */}
@@ -465,18 +464,15 @@ export function LoginPage() {
               />
             </div>
             <h1
+              className="text-3xl font-bold tracking-tight text-foreground"
               style={{
-                fontSize: 32,
-                fontWeight: 700,
-                color: "#0f172a",
-                letterSpacing: "-0.025em",
                 lineHeight: 1.15,
                 marginBottom: 10,
               }}
             >
               Welcome back
             </h1>
-            <p style={{ fontSize: 14, color: "#64748b", lineHeight: 1.6 }}>
+            <p className="text-sm text-muted-foreground" style={{ lineHeight: 1.6 }}>
               Sign in to your school dashboard
             </p>
           </div>
@@ -497,15 +493,7 @@ export function LoginPage() {
             <div>
               <Label
                 htmlFor="email"
-                style={{
-                  display: "block",
-                  marginBottom: 7,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "#374151",
-                  letterSpacing: "0.07em",
-                  textTransform: "uppercase",
-                }}
+                className="block mb-2 text-[11px] font-semibold tracking-wider uppercase text-foreground"
               >
                 Email address
               </Label>
@@ -523,15 +511,7 @@ export function LoginPage() {
             <div>
               <Label
                 htmlFor="password"
-                style={{
-                  display: "block",
-                  marginBottom: 7,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "#374151",
-                  letterSpacing: "0.07em",
-                  textTransform: "uppercase",
-                }}
+                className="block mb-2 text-[11px] font-semibold tracking-wider uppercase text-foreground"
               >
                 Password
               </Label>
@@ -547,7 +527,7 @@ export function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="lp-eye"
+                  className="lp-eye text-muted-foreground hover:text-foreground"
                   style={{
                     position: "absolute",
                     right: 12,
@@ -556,7 +536,6 @@ export function LoginPage() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "#9ca3af",
                     display: "flex",
                     alignItems: "center",
                     padding: 0,
@@ -577,12 +556,7 @@ export function LoginPage() {
               />
               <Label
                 htmlFor="remember"
-                style={{
-                  fontSize: 13,
-                  fontWeight: 400,
-                  color: "#6b7280",
-                  cursor: "pointer",
-                }}
+                className="text-[13px] font-normal text-muted-foreground cursor-pointer"
               >
                 Remember me for 30 days
               </Label>
@@ -592,16 +566,13 @@ export function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="lp-btn"
+              className="lp-btn w-full"
               style={{
                 height: 46,
                 fontSize: 14,
                 fontWeight: 600,
                 letterSpacing: "0.025em",
                 marginTop: 4,
-                color: "#ffffff",
-                background: loading ? undefined : "#000000",
-                border: "none",
                 boxShadow: loading ? "none" : "0 4px 12px rgba(0, 0, 0, 0.15)",
                 transition: "box-shadow .2s, transform .15s",
               }}
@@ -619,13 +590,7 @@ export function LoginPage() {
 
           {/* Footer note */}
           <p
-            style={{
-              marginTop: 36,
-              fontSize: 12,
-              color: "#94a3b8",
-              textAlign: "center",
-              lineHeight: 1.7,
-            }}
+            className="mt-9 text-xs text-muted-foreground text-center leading-relaxed"
           >
             Access restricted to authorised school personnel only
           </p>
