@@ -1,6 +1,6 @@
 # School Manager Client
 
-React front end for School Manager, a role-based school administration system. The client provides separate experiences for administrators, principals, and teachers and communicates with the Rails JSON API in `../server`.
+React front end for School Manager, a role-based school administration system. The client provides separate experiences for administrators, principals, and teachers and communicates with the backend.
 
 ## Features
 
@@ -24,9 +24,7 @@ React front end for School Manager, a role-based school administration system. T
 
 - Node.js 20 or newer
 - Bun, npm, pnpm, or Yarn
-- Running School Manager API server from `../server`
-
-The repository includes `bun.lock`, so Bun is the preferred package manager. The npm commands below also work if you install with npm.
+- Running School Manager API server
 
 ## Getting Started
 
@@ -38,7 +36,7 @@ The repository includes `bun.lock`, so Bun is the preferred package manager. The
 
 2. Configure the API URL:
 
-   Set `VITE_API_BASE_URL` to the Rails API base URL. For local development:
+   Set `VITE_API_BASE_URL` to the backend URL. For local development:
 
    ```env
    VITE_API_BASE_URL=http://localhost:3000/api/v1
@@ -69,7 +67,7 @@ Use `npm run <script>` instead of `bun run <script>` if you install dependencies
 | ------------------- | -------- | ------------------------------ | ------------------------------ |
 | `VITE_API_BASE_URL` | No       | `http://localhost:3000/api/v1` | Base URL for all API requests. |
 
-Only variables prefixed with `VITE_` are exposed to the browser by Vite. Do not put server secrets in client environment files.
+Only variables prefixed with `VITE_` are exposed to the browser by Vite. Do not put any other secrets in environment files.
 
 ## Project Structure
 
@@ -119,3 +117,9 @@ bun run build
 ```
 
 The static output is written to `dist/` and can be served by any static hosting platform. Configure `VITE_API_BASE_URL` at build time for the target environment.
+
+Preview the production build with:
+
+```bash
+bun run preview
+```
